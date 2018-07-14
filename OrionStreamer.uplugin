@@ -1,0 +1,50 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.1",
+	"FriendlyName": "IKinema Orion Streamer Node",
+	"Description": "IKinema Orion Streamer Node. This plug-in allows the user to stream in the Orion skeleton into Unreal Engine 4",
+	"Category": "Animation",
+	"CreatedBy": "IKinema Ltd",
+	"CreatedByURL": "http://IKinema.com",
+	"DocsURL": "https://ikinema.com/index.php?mod=documentation&show=317&id=323",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"Installed": false,
+  "Modules": [
+
+    {
+      "LoadingPhase": "PreDefault",
+      "Name": "OrionLiveLink",
+      "Type": "Editor",
+      "WhitelistPlatforms": [
+        "Win64"
+      ]
+    },
+    	{
+			"Name": "OrionDataStreamCore",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit",
+			"WhitelistPlatforms": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "OrionDataStreamEditor",
+			"Type": "Developer",
+			"LoadingPhase": "PreDefault",
+			"WhitelistPlatforms": [
+				"Win64"
+			]
+		}
+
+  ],
+  "Plugins": [
+    {
+      "Name": "LiveLink",
+      "Enabled": true
+    }
+  ]    
+}
