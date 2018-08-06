@@ -22,6 +22,7 @@
 #include "OrionDataStreamCorePrivatePCH.h"
 #include "StepVrServerModule.h"
 #include "StepVrGlobal.h"
+#include "StepVrBPLibrary.h"
 #include "AnimInstanceProxy.h"
 
 
@@ -214,18 +215,24 @@ void FAnimNode_OrionDataStream::Evaluate_AnyThread(FPoseContext& Output)
 	Bones.Init(FTransform::Identity, numberOfBones);
 
 
+	float scale = 1;
+
 	if (IsLocalControlled)
 	{
+		//缩放
+		scale = mSkeletonBinding.GetFigureScale();
+
 		//获取本地姿态
 		if (!mSkeletonBinding.UpdatePose(Bones) || Bones.Num() == 0)
 		{
 			return;
 		}
 
-		//同步
+		//同步数据
 		if (STEPVR_SERVER_ISRUN)
 		{
 			FrameSendData.PlayerID = OwnerPlayerID;
+			FrameSendData.Scale = scale;
 			mSkeletonBinding.GetUE4BoneIndices(FrameSendData.SkeletionIDs);
 			FrameSendData.SkeletonInfos = Bones;
 
@@ -236,6 +243,7 @@ void FAnimNode_OrionDataStream::Evaluate_AnyThread(FPoseContext& Output)
 	}
 	else if(STEPVR_SERVER_ISRUN)
 	{
+		scale = FrameCacheData.Scale;
 		Bones = FrameCacheData.SkeletonInfos;
 	}
 
@@ -252,7 +260,7 @@ void FAnimNode_OrionDataStream::Evaluate_AnyThread(FPoseContext& Output)
 		auto ue4Index = mSkeletonBinding.GetUE4BoneIndex(i);
 		if (ue4Index != INDEX_NONE)
 		{
-			auto bone = Bones[i];
+			FTransform& bone = Bones[i];
 			if (i == 0 && ue4Index == i)
 			{
 				const FQuat rot(FVector(1, 0, 0), FMath::DegreesToRadians(-90));
@@ -264,18 +272,12 @@ void FAnimNode_OrionDataStream::Evaluate_AnyThread(FPoseContext& Output)
 				const FQuat rot(FVector(1, 0, 0), FMath::DegreesToRadians(-90));
 				bone = bone * rot;
 			}
+
 			auto SkeletonIndex = Output.Pose.GetBoneContainer().MakeCompactPoseIndex(FMeshPoseBoneIndex(ue4Index));
 			
 			//确定某骨架姿态
 			Output.Pose[SkeletonIndex] = bone;
 		}
-	}
-
-
-	float scale = 1;
-	if (IsLocalControlled)
-	{
-		mSkeletonBinding.GetFigureScale();
 	}
 	
 	auto SkelMesh = Output.AnimInstanceProxy->GetSkelMeshComponent(); 
